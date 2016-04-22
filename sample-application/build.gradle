@@ -1,0 +1,81 @@
+apply from: '../ewerk-plugins.gradle'
+
+apply plugin: 'org.gradle.java'
+apply plugin: 'org.gradle.war'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile("org.slf4j:slf4j-api:$slf4jVersion",
+          "org.slf4j:slf4j-simple:$slf4jVersion",
+          "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:$persistenceApiVersion",
+          "org.springframework.data:spring-data-mongodb:$springDataMongoVersion",
+          "org.mongodb.morphia:morphia:$morphiaVersion",
+          "com.querydsl:querydsl-mongodb:$querydslVersion")
+
+  testCompile("org.testng:testng:$testNgVersion",
+              "org.assertj:assertj-core:$assertjVersion")
+
+  providedRuntime "javax.validation:validation-api:$validationVersion"
+}
+
+annotationProcessor {
+  library "com.querydsl:querydsl-apt:$querydslVersion"
+  processor 'com.querydsl.apt.morphia.MorphiaAnnotationProcessor'
+  sourcesDir 'src/morphia/java'
+}
+
+artifactoryDebPublish {
+  baseUrl = 'https://artifactory.company.com'
+  user = 'a.user'
+  password = '***'
+  repoKey = 'debian-snapshots'
+  distribution = 'jessie'
+  component = 'non-free'
+  arch = 'amd64'
+  archive = file('src/main/resources/helloworld_1.0_amd64.deb')
+}
+
+autoValue {
+  library = "com.google.auto.value:auto-value:$autoValueVersion"
+  autoValueSourcesDir = 'src/autoValue/java'
+}
+
+dagger {
+  library = "com.google.dagger:dagger:$dagger2Version"
+  processorLibrary = "com.google.dagger:dagger-compiler:$dagger2Version"
+  daggerSourcesDir = 'src/dagger/java'
+}
+
+jaxb2 {
+  xjc {
+    'model-classes' {
+      basePackage = 'com.ewerk.gradle.plugins.sample'
+      schema = 'src/main/xsd/model.xsd'
+    }
+  }
+}
+
+querydsl {
+  library = "com.querydsl:querydsl-apt:$querydslVersion"
+  querydslSourcesDir = 'src/querydsl/java'
+  jpa = true
+  jdo = false
+  hibernate = false
+  morphia = false
+  roo = false
+  springDataMongo = true
+  querydslDefault = true
+}
+
+integrationTest {
+  useTestNG()
+  maxHeapSize = '128m'
+}
+
+test {
+  useTestNG()
+  maxHeapSize = '128m'
+}
